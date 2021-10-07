@@ -12,20 +12,34 @@ export class Board extends Component {
                 }
             ],
             xIsNext: true,
+            play_with_bot: false,
+            game_start: false,
+            difficulty: 'easy'
         }
     }
 
     handleClick(i) {
-        const squares = this.state.squares.slice();
+        const squares = this.state.history[this.state.history.length - 1].squares.slice();
         if (this.calculateWinner(squares) || squares[i]) {
             return;
         }
         squares[i] = this.state.xIsNext ? 'X' : '0';
         this.setState({
             squares: squares,
-            history: this.state.history.concat({squares: squares}),
-            xIsNext: !this.state.xIsNext
+            history: this.state.history.concat({ squares: squares }),
+            xIsNext: !this.state.xIsNext,
+            game_start: true
         });
+    }
+
+
+    handleHistory(index) {
+        this.state.history.splice(index + 1)
+        this.setState({
+            history: this.state.history,
+            xIsNext: index % 2 !== 0 ? false : true,
+            game_start: index === 0 ? false : true
+        })
     }
 
     renderBox(i, nameClass) {
@@ -35,25 +49,32 @@ export class Board extends Component {
     }
 
     boardStyle = {
-        margin: '5% -5% 0% 10%',
+        margin: '5% 0% 0% 0%',
         textAlign: 'center',
-        width: '65%',
+        width: '60%',
     }
 
     historyStyle = {
-        margin: '5% auto 0 0',
+        margin: '5% 0% 0% 0%',
+        textAlign: 'center',
     }
 
     rootDiv = {
-        display:'flex'
+        display: 'flex'
     }
 
     historyDiv = {
         display: 'grid'
     }
 
-    historySpan = {
-        maring: '0px 0px 5px 0px'
+    historyButtons = {
+        margin: '0px 0px 5px 0px'
+    }
+
+    gameSetting = {
+        width: '20%',
+        textAlign: 'center',
+        margin: '5% 0% 0% 0%',
     }
 
     calculateWinner(squares) {
@@ -76,26 +97,67 @@ export class Board extends Component {
         return null;
     }
 
+    handlePlayWithBot(ev) {
+        this.setState({
+            play_with_bot: ev.target.checked
+        })
+    }
+
+    handleGameDifficulty(ev) {
+        this.setState({
+            difficulty: ev.currentTarget.id
+        })
+    }
+
     render() {
-        const winner = this.calculateWinner(this.state.squares);
+        const winner = this.calculateWinner(this.state.history[this.state.history.length - 1].squares.slice());
         let status;
-        if(winner){
+        if (winner) {
             status = 'winner is ' + winner;
         }
-        else{
+        else if (this.state.history.length === 10) {
+            status = 'Game Draw !!!!'
+        }
+        else {
             status = 'Player ' + (this.state.xIsNext ? 'X' : '0') + ' turn'
         }
-        const game_history = this.state.history.map((history, index)=>{
-            if (index === 0){
-                return <span key={index} style={this.historySpan}>Game Start</span>
+
+        const game_history = this.state.history.map((history, index) => {
+            if (index === 0) {
+                return <button key={index} style={this.historyButtons} onClick={() => this.handleHistory(index)}>Go to Game Start</button>
             }
-            else{
-                return <span key={index} style={this.historySpan}>Move : {index}</span>
+            else {
+                return <button key={index} style={this.historyButtons} onClick={() => this.handleHistory(index)}>Go to Move : {index}</button>
             }
         })
-        
+
+        let game_difficulty = ''
+        if (this.state.play_with_bot) {
+            game_difficulty = <>
+                <h5>Select difficulty</h5>
+
+                <input type="radio" name="gameDifficulty" id="easy" checked={this.state.difficulty === 'easy'} 
+                    onChange={(ev) => this.handleGameDifficulty(ev)} disabled={this.state.game_start}></input>
+                <label htmlFor="easy">Easy</label>
+
+                <input type="radio" name="gameDifficulty" id="medium" checked={this.state.difficulty === 'medium'} 
+                    onChange={(ev) => this.handleGameDifficulty(ev)} disabled={this.state.game_start}></input>
+                <label htmlFor="medium">Medium</label>
+
+                <input type="radio" name="gameDifficulty" id="hard" checked={this.state.difficulty === 'hard'} 
+                    onChange={(ev) => this.handleGameDifficulty(ev)} disabled={this.state.game_start}></input>
+                <label htmlFor="hard">Hard</label>
+            </>
+        }
+
         return (
             <div style={this.rootDiv}>
+                <div style={this.gameSetting}>
+                    <h3>Game Setting</h3>
+                    <input id="play_with_bot" type="checkbox" disabled={this.state.game_start} checked={this.state.play_with_bot} onChange={(ev) => this.handlePlayWithBot(ev)} />
+                    <label htmlFor="play_with_bot">Play with bot</label>
+                    {game_difficulty}
+                </div>
                 <div id="container" style={this.boardStyle}>
                     <h2>{status}</h2>
                     <div className="block">
