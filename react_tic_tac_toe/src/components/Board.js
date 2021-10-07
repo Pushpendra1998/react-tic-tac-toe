@@ -29,9 +29,32 @@ export class Board extends Component {
             history: this.state.history.concat({ squares: squares }),
             xIsNext: !this.state.xIsNext,
             game_start: true
+        }, () => {
+            setInterval(() => {
+                // bot next move.
+                if (this.state.play_with_bot && !this.state.xIsNext) {
+                    let randomIndex = this.botAvailableMove()
+                    this.handleClick(randomIndex)
+                }
+            }, 1000)
+
         });
     }
 
+    botAvailableMove() {
+        let available_index = this.state.squares.map((value, index) => {
+            if (!value) { return index }
+            else { return false }
+        })
+
+        let filter_index = available_index.filter((value) => {
+            if (value === 0 || value) return true
+        })
+
+        let randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
+
+        return randomIndex
+    }
 
     handleHistory(index) {
         this.state.history.splice(index + 1)
@@ -127,7 +150,9 @@ export class Board extends Component {
                 return <button key={index} style={this.historyButtons} onClick={() => this.handleHistory(index)}>Go to Game Start</button>
             }
             else {
-                return <button key={index} style={this.historyButtons} onClick={() => this.handleHistory(index)}>Go to Move : {index}</button>
+                return <button key={index} style={this.historyButtons} 
+                disabled={this.state.play_with_bot && index % 2 !== 0 ? false : true}
+                onClick={() => this.handleHistory(index)}>Go to Move : {index}</button>
             }
         })
 
@@ -136,15 +161,15 @@ export class Board extends Component {
             game_difficulty = <>
                 <h5>Select difficulty</h5>
 
-                <input type="radio" name="gameDifficulty" id="easy" checked={this.state.difficulty === 'easy'} 
+                <input type="radio" name="gameDifficulty" id="easy" checked={this.state.difficulty === 'easy'}
                     onChange={(ev) => this.handleGameDifficulty(ev)} disabled={this.state.game_start}></input>
                 <label htmlFor="easy">Easy</label>
 
-                <input type="radio" name="gameDifficulty" id="medium" checked={this.state.difficulty === 'medium'} 
+                <input type="radio" name="gameDifficulty" id="medium" checked={this.state.difficulty === 'medium'}
                     onChange={(ev) => this.handleGameDifficulty(ev)} disabled={this.state.game_start}></input>
                 <label htmlFor="medium">Medium</label>
 
-                <input type="radio" name="gameDifficulty" id="hard" checked={this.state.difficulty === 'hard'} 
+                <input type="radio" name="gameDifficulty" id="hard" checked={this.state.difficulty === 'hard'}
                     onChange={(ev) => this.handleGameDifficulty(ev)} disabled={this.state.game_start}></input>
                 <label htmlFor="hard">Hard</label>
             </>
