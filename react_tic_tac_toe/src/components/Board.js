@@ -132,6 +132,14 @@ export class Board extends Component {
         })
     }
 
+    handleGoToButtons(index){
+        if(this.state.play_with_bot){
+            if(index % 2 !== 0 ? false : true)
+                return true;
+        }
+        return false;
+    }
+
     render() {
         const winner = this.calculateWinner(this.state.history[this.state.history.length - 1].squares.slice());
         let status;
@@ -151,7 +159,7 @@ export class Board extends Component {
             }
             else {
                 return <button key={index} style={this.historyButtons} 
-                disabled={this.state.play_with_bot && index % 2 !== 0 ? false : true}
+                disabled={this.handleGoToButtons(index)}
                 onClick={() => this.handleHistory(index)}>Go to Move : {index}</button>
             }
         })
