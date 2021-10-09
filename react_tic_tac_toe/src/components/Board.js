@@ -105,7 +105,7 @@ export class Board extends Component {
         if(this.state.difficulty === 'easy'){
             randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
         }
-        if(this.state.difficulty === 'hard'){
+        else{
             // 1. If player 'X' choose the center box
             if(this.state.player_x[0] === 4){
                 // 1.1 Bot first move. 
@@ -127,7 +127,7 @@ export class Board extends Component {
                 }
 
                 // 1.4 check has 2 even number (Special condition)
-                else if (this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 8))){
+                else if ( this.state.difficulty === 'hard' && this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 8))){
                     console.log('Special condition found! so, occupied corner by bot')
                     if((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4))
                         randomIndex = [0, 8][Math.floor(Math.random() * [0, 8].length)]
@@ -161,8 +161,8 @@ export class Board extends Component {
                     randomIndex = this.checkPlayerWin(winning_positions, this.state.player_x)
                 }
                 
-                // 2.4 check if player occupies two corners in two moves.
-                else if (this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_x[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_x[0]) === 8))){
+                // 2.4 check if player occupies two corners in two moves. (Special condition)
+                else if (this.state.difficulty === 'hard' && this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_x[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_x[0]) === 8))){
                     console.log('Special condition found! so, occupied corner by bot')
                     randomIndex = [1, 3, 5, 7][Math.floor(Math.random() * [1, 3, 5, 7].length)]
                 }
@@ -183,7 +183,7 @@ export class Board extends Component {
                     })
                 }
                 // 3.2 Bot second move
-                else if(this.state.player_x.length == 2 && this.state.player_x[1] !== 4){
+                else if(this.state.player_x.length === 2 && this.state.player_x[1] !== 4){
                     console.log('bot occupy middle box in second move');
                     randomIndex = 4;
                 }
