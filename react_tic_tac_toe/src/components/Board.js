@@ -91,21 +91,21 @@ export class Board extends Component {
         })
         
         let randomIndex;
+        const winning_positions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+
         if(this.state.difficulty === 'easy'){
             randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
         }
         if(this.state.difficulty === 'hard'){
-            const winning_positions = [
-                [0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8],
-                [0, 3, 6],
-                [1, 4, 7],
-                [2, 5, 8],
-                [0, 4, 8],
-                [2, 4, 6],
-            ];
-            
             // 1. If player 'X' choose the center box
             if(this.state.player_x[0] === 4){
                 // 1.1 Bot first move. 
@@ -167,6 +167,38 @@ export class Board extends Component {
                     randomIndex = [1, 3, 5, 7][Math.floor(Math.random() * [1, 3, 5, 7].length)]
                 }
                 // 2.5 Random Move
+                else{
+                    console.log('Random move')
+                    randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
+                }
+            }
+            else if([1, 3, 5, 7].includes(this.state.player_x[0])){ // 3. game start with side condition
+                // 3.1 Bot first move
+                if(this.state.history.length-1 === 1){
+                    console.log('bot first move')
+                    winning_positions.forEach(element => {
+                        if(element[1] === this.state.player_x[0]){
+                            randomIndex = element[0];
+                        }
+                    })
+                }
+                // 3.2 Bot second move
+                else if(this.state.player_x.length == 2 && this.state.player_x[1] !== 4){
+                    console.log('bot occupy middle box in second move');
+                    randomIndex = 4;
+                }
+                // 3.3 check if bot can win
+                else if(this.checkPlayerWin(winning_positions, this.state.player_0) === 0 || this.checkPlayerWin(winning_positions, this.state.player_0)){
+                    console.log('Bot can win')
+                    randomIndex = this.checkPlayerWin(winning_positions, this.state.player_0)
+                }
+
+                // 3.4 check if opponent could win
+                else if (this.checkPlayerWin(winning_positions, this.state.player_x) === 0 || this.checkPlayerWin(winning_positions, this.state.player_x)){
+                    console.log('Opponent can win')
+                    randomIndex = this.checkPlayerWin(winning_positions, this.state.player_x)
+                }
+                // 3.5 Random Move
                 else{
                     console.log('Random move')
                     randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
