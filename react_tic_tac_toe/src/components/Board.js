@@ -108,7 +108,7 @@ export class Board extends Component {
             
             // 1. If player 'X' choose the center box
             if(this.state.player_x[0] === 4){
-                // 1.1 Occupy corner. (Special condition)
+                // 1.1 Bot first move. 
                 if(this.state.history.length-1 === 1){
                     console.log('Started with middle box')
                     console.log('Corner occupied by bot')
@@ -126,7 +126,7 @@ export class Board extends Component {
                     randomIndex = this.checkPlayerWin(winning_positions, this.state.player_x)
                 }
 
-                // 1.4 check has 2 even number
+                // 1.4 check has 2 even number (Special condition)
                 else if (this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 8))){
                     console.log('Special condition found! so, occupied corner by bot')
                     if((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4))
@@ -135,6 +135,38 @@ export class Board extends Component {
                     if((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 8))
                         randomIndex = [2, 6][Math.floor(Math.random() * [2, 6].length)]
                 }
+                // 1.5 Random Move
+                else{
+                    console.log('Random move')
+                    randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
+                }
+            }
+            else if([0, 2, 6, 8].includes(this.state.player_x[0])){ // 2. Check if game starts with corner conditions
+                // 2.1 Occupy middle box
+                if(this.state.history.length-1 === 1){
+                    console.log('Started with Corner box')
+                    console.log('Middle box occupied by bot')
+                    randomIndex = 4
+                }
+
+                // 2.2 check if bot can win
+                else if(this.checkPlayerWin(winning_positions, this.state.player_0) === 0 || this.checkPlayerWin(winning_positions, this.state.player_0)){
+                    console.log('Bot can win')
+                    randomIndex = this.checkPlayerWin(winning_positions, this.state.player_0)
+                }
+
+                // 2.3 check if opponent could win
+                else if (this.checkPlayerWin(winning_positions, this.state.player_x) === 0 || this.checkPlayerWin(winning_positions, this.state.player_x)){
+                    console.log('Opponent can win')
+                    randomIndex = this.checkPlayerWin(winning_positions, this.state.player_x)
+                }
+                
+                // 2.4 check if player occupies two corners in two moves.
+                else if (this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_x[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_x[0]) === 8))){
+                    console.log('Special condition found! so, occupied corner by bot')
+                    randomIndex = [1, 3, 5, 7][Math.floor(Math.random() * [1, 3, 5, 7].length)]
+                }
+                // 2.5 Random Move
                 else{
                     console.log('Random move')
                     randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
