@@ -14,8 +14,34 @@ export class Board extends Component {
             xIsNext: true,
             play_with_bot: false,
             game_start: false,
-            difficulty: 'easy'
+            difficulty: 'easy',
+            player_x: [],
+            player_0: [],
         }
+    }
+
+    checkPlayerWin(winning_positions, player){
+        var win_pos = false;
+        winning_positions.forEach(element => {
+            if(player.includes(element[0]) && player.includes(element[1])){
+                if(!this.state.squares[element[2]])
+                    win_pos = element[2]
+            }
+            else if(player.includes(element[1]) && player.includes(element[2])){
+                if(!this.state.squares[element[0]])
+                    win_pos = element[0]
+            }
+            else if(player.includes(element[0]) && player.includes(element[2])){
+                if(!this.state.squares[element[1]])
+                    win_pos = element[1]
+            }
+        });
+
+        // Check if win_pos is occupied
+        if(this.state.squares[win_pos] || player.length < 2){
+            return false
+        }
+        return win_pos;
     }
 
     handleClick(i) {
@@ -24,6 +50,17 @@ export class Board extends Component {
             return;
         }
         squares[i] = this.state.xIsNext ? 'X' : '0';
+        if(this.state.xIsNext){
+            this.setState({
+                player_x: this.state.player_x.concat(i)
+            })
+        }
+        else{
+            this.setState({
+                player_0: this.state.player_0.concat(i)
+            })
+        }
+
         this.setState({
             squares: squares,
             history: this.state.history.concat({ squares: squares }),
@@ -49,14 +86,72 @@ export class Board extends Component {
 
         let filter_index = available_index.filter((value) => {
             if (value === 0 || value) return true
+            else
+                return null
         })
+        
+        let randomIndex;
+        if(this.state.difficulty === 'easy'){
+            randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
+        }
+        if(this.state.difficulty === 'hard'){
+            const winning_positions = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6],
+            ];
+            
+            // 1. If player 'X' choose the center box
+            if(this.state.player_x[0] === 4){
+                // 1.1 Occupy corner. (Special condition)
+                if(this.state.history.length-1 === 1){
+                    console.log('Started with middle box')
+                    console.log('Corner occupied by bot')
+                    randomIndex = [0, 2, 6, 8][Math.floor(Math.random() * [0, 2, 6, 8].length)]
+                }
+                // 1.2 check if bot can win
+                else if(this.checkPlayerWin(winning_positions, this.state.player_0) === 0 || this.checkPlayerWin(winning_positions, this.state.player_0)){
+                    console.log('Bot can win')
+                    randomIndex = this.checkPlayerWin(winning_positions, this.state.player_0)
+                }
 
-        let randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
+                // 1.3 check if opponent could win
+                else if (this.checkPlayerWin(winning_positions, this.state.player_x) === 0 || this.checkPlayerWin(winning_positions, this.state.player_x)){
+                    console.log('Opponent can win')
+                    randomIndex = this.checkPlayerWin(winning_positions, this.state.player_x)
+                }
+
+                // 1.4 check has 2 even number
+                else if (this.state.player_x.length === 2 && ((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4) || (Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 8))){
+                    console.log('Special condition found! so, occupied corner by bot')
+                    if((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 4))
+                        randomIndex = [0, 8][Math.floor(Math.random() * [0, 8].length)]
+
+                    if((Math.abs(this.state.player_x[1] - this.state.player_0[0]) === 8))
+                        randomIndex = [2, 6][Math.floor(Math.random() * [2, 6].length)]
+                }
+                else{
+                    console.log('Random move')
+                    randomIndex = filter_index[Math.floor(Math.random() * filter_index.length)];
+                }
+            }
+        }
 
         return randomIndex
     }
 
     handleHistory(index) {
+        if(index === 0){
+            this.setState({
+                player_0: [],
+                player_x: []
+            })
+        }
         this.state.history.splice(index + 1)
         this.setState({
             history: this.state.history,
@@ -134,8 +229,7 @@ export class Board extends Component {
 
     handleGoToButtons(index){
         if(this.state.play_with_bot){
-            if(index % 2 !== 0 ? false : true)
-                return true;
+            return true;
         }
         return false;
     }
@@ -146,7 +240,7 @@ export class Board extends Component {
         if (winner) {
             status = 'winner is ' + winner;
         }
-        else if (this.state.history.length === 10) {
+        else if (this.state.history.length >= 10) {
             status = 'Game Draw !!!!'
         }
         else {
